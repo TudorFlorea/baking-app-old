@@ -1,15 +1,18 @@
 package com.andev.tudor.bakingapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.andev.tudor.bakingapp.R;
 import com.andev.tudor.bakingapp.data.Step;
+import com.andev.tudor.bakingapp.utils.InterfaceUtils;
 
 import java.util.ArrayList;
 
@@ -20,10 +23,12 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.St
 
     private Context mContext;
     private ArrayList<Step> mSteps;
+    private InterfaceUtils.RecipeStepListener mListener;
 
-    public RecipeStepAdapter(Context context, ArrayList<Step> steps) {
+    public RecipeStepAdapter(Context context, ArrayList<Step> steps, InterfaceUtils.RecipeStepListener listener) {
         mContext = context;
         mSteps = steps;
+        mListener = listener;
     }
 
     @NonNull
@@ -44,19 +49,29 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.St
         return mSteps != null ? mSteps.size() : 0;
     }
 
-    public class StepViewHolder extends RecyclerView.ViewHolder {
+    public class StepViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.recipe_step_tv) TextView mRecipeStepTV;
         private Step mStep;
 
         public StepViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(this);
             ButterKnife.bind(this, itemView);
         }
 
         public void setData(Step step) {
             mStep = step;
             mRecipeStepTV.setText(step.getShortDescription());
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (mListener != null) {
+                mListener.onStepClick(mStep);
+            }
+
+            Toast.makeText(mContext, "test", Toast.LENGTH_SHORT).show();
         }
     }
 

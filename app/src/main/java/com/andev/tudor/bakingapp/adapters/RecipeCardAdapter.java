@@ -72,7 +72,7 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
             Intent i = new Intent(mContext, RecipeDetailsActivity.class);
             i.putExtra("recipe_extra", mRecipe);
             mContext.startActivity(i);
-            //Toast.makeText(mContext, mRecipe.getName(), Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, mRecipe.getName(), Toast.LENGTH_LONG).show();
         }
     }
 }

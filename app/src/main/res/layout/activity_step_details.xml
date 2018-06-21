@@ -10,7 +10,7 @@
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/recipe_details_fl">
+        android:id="@+id/step_details_fl">
 
     </FrameLayout>
 
