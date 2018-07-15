@@ -12,12 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
+import android.widget.Toast;
 import com.andev.tudor.bakingapp.R;
 import com.andev.tudor.bakingapp.StepDetailsActivity;
 import com.andev.tudor.bakingapp.adapters.RecipeStepAdapter;
 import com.andev.tudor.bakingapp.data.Recipe;
 import com.andev.tudor.bakingapp.data.Step;
+import com.andev.tudor.bakingapp.utils.Constants;
 import com.andev.tudor.bakingapp.utils.InterfaceUtils;
 
 import butterknife.BindView;
@@ -52,6 +53,11 @@ public class RecipeDetailsFragment extends Fragment implements InterfaceUtils.Re
                 mRecipeStepsRV.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayout.VERTICAL, false));
                 mRecipeStepAdapter = new RecipeStepAdapter(getActivity(), recipe.getSteps(), this);
                 mRecipeStepsRV.setAdapter(mRecipeStepAdapter);
+
+                //Intent intent = new Intent(IngredientsWidget.ACTION_INGREDIENTS_SENT);
+                //intent.putExtra("ingredients_extra", recipe.getIngredients());
+                //getActivity().sendBroadcast(intent);
+
         }
         catch (NullPointerException npe) {
             npe.printStackTrace();
@@ -59,9 +65,15 @@ public class RecipeDetailsFragment extends Fragment implements InterfaceUtils.Re
     }
 
     @Override
-    public void onStepClick(Step step) {
+    public void onStepClick(Bundle stepsData) {
         Intent i = new Intent(getActivity(), StepDetailsActivity.class);
-        i.putExtra(STEP_EXTRA, step);
+        if (stepsData.getParcelableArrayList(Constants.STEPS_ARRAY_LIST_TAG) == null) {
+            Toast.makeText(getActivity(), "ArrayList is null", Toast.LENGTH_SHORT).show();
+        } else {
+            Step st =(Step) stepsData.getParcelableArrayList(Constants.STEPS_ARRAY_LIST_TAG).get(1);
+            Toast.makeText(getActivity(),st.getDescription() , Toast.LENGTH_SHORT).show();
+        }
+        i.putExtra(Constants.STEPS_DATA_TAG, stepsData);
         getActivity().startActivity(i);
     }
 }

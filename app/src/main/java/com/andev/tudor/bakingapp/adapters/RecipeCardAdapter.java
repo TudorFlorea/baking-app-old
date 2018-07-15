@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.andev.tudor.bakingapp.R;
 import com.andev.tudor.bakingapp.RecipeDetailsActivity;
 import com.andev.tudor.bakingapp.data.Recipe;
+import com.andev.tudor.bakingapp.utils.Constants;
 
 import java.util.ArrayList;
 
@@ -24,7 +25,6 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
 
     private Context mContext;
     private ArrayList<Recipe> mRecipes;
-
 
     public RecipeCardAdapter(Context context, ArrayList<Recipe> recipes) {
         mContext = context;
@@ -43,7 +43,7 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
 
     @Override
     public void onBindViewHolder(@NonNull CardViewHolder holder, int position) {
-        holder.setData(mRecipes.get(position));
+        holder.setData(mRecipes.get(position), position);
     }
 
     @Override
@@ -55,6 +55,7 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
 
         @BindView(R.id.recipe_name_tv) TextView mRecipeName;
         private Recipe mRecipe;
+        private int mRecipePosition;
 
         public CardViewHolder(View itemView) {
             super(itemView);
@@ -62,15 +63,17 @@ public class RecipeCardAdapter extends RecyclerView.Adapter<RecipeCardAdapter.Ca
             ButterKnife.bind(this, itemView);
         }
 
-        public void setData(Recipe recipe) {
+        public void setData(Recipe recipe, int recipePosition) {
             mRecipe = recipe;
             mRecipeName.setText(recipe.getName());
+            mRecipePosition = recipePosition;
         }
 
         @Override
         public void onClick(View v) {
             Intent i = new Intent(mContext, RecipeDetailsActivity.class);
             i.putExtra("recipe_extra", mRecipe);
+            i.putExtra(Constants.CURRENT_RECIPE_INDEX_TAG, mRecipePosition);
             mContext.startActivity(i);
             Toast.makeText(mContext, mRecipe.getName(), Toast.LENGTH_LONG).show();
         }

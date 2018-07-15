@@ -2,6 +2,7 @@ package com.andev.tudor.bakingapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,12 +13,15 @@ import android.widget.Toast;
 
 import com.andev.tudor.bakingapp.R;
 import com.andev.tudor.bakingapp.data.Step;
+import com.andev.tudor.bakingapp.utils.Constants;
 import com.andev.tudor.bakingapp.utils.InterfaceUtils;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.andev.tudor.bakingapp.utils.Constants.STEPS_ARRAY_LIST_TAG;
 
 public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.StepViewHolder> {
 
@@ -68,7 +72,13 @@ public class RecipeStepAdapter extends RecyclerView.Adapter<RecipeStepAdapter.St
         @Override
         public void onClick(View v) {
             if (mListener != null) {
-                mListener.onStepClick(mStep);
+
+                Bundle stepsData = new Bundle();
+
+                stepsData.putParcelableArrayList(Constants.STEPS_ARRAY_LIST_TAG, mSteps);
+                stepsData.putInt(Constants.CURRENT_STEP_INDEX_TAG, mSteps.indexOf(mStep));
+
+                mListener.onStepClick(stepsData);
             }
 
             Toast.makeText(mContext, "test", Toast.LENGTH_SHORT).show();

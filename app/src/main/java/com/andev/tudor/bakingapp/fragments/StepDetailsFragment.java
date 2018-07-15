@@ -1,5 +1,7 @@
 package com.andev.tudor.bakingapp.fragments;
 
+import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,8 +13,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.andev.tudor.bakingapp.data.Step;
+import com.andev.tudor.bakingapp.utils.Constants;
 import com.andev.tudor.bakingapp.utils.InterfaceUtils.RecipeStepListener;
 
 import com.andev.tudor.bakingapp.R;
@@ -33,19 +40,27 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class StepDetailsFragment extends Fragment implements SimpleExoPlayer.EventListener{
 
     @BindView(R.id.player_view) SimpleExoPlayerView mPlayerView;
+    @BindView(R.id.step_description_tv) TextView mStepDescriptionTV;
+    @BindView(R.id.previous_step_btn) Button mPreviousStepBtn;
+    @BindView(R.id.next_step_btn) Button mNextStepBtn;
 
     private SimpleExoPlayer mPlayer;
     private MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
     private RecipeStepListener mListener;
+    private ArrayList<Step> mSteps;
+    private int mCurrentStepIndex;
 
     private final String STEP_EXTRA = "step_extra";
+    private final String PLAYER_POSITION_KEY = "position";
 
     public StepDetailsFragment() {
 
@@ -69,11 +84,37 @@ public class StepDetailsFragment extends Fragment implements SimpleExoPlayer.Eve
         super.onViewCreated(view, savedInstanceState);
 
         try {
-            Step step = getArguments().getParcelable(STEP_EXTRA);
 
-            initMediaSession();
-            Log.v("Player", step.getVideoUrl());
-            initPlayer(Uri.parse(step.getVideoUrl()));
+            mSteps = getArguments().getParcelableArrayList(Constants.STEPS_ARRAY_LIST_TAG);
+            mCurrentStepIndex = getArguments().getInt(Constants.CURRENT_STEP_INDEX_TAG);
+
+            if (mSteps == null) {
+                Toast.makeText(getActivity(), "Null " + mCurrentStepIndex, Toast.LENGTH_LONG).show();
+            }
+
+            Step step = mSteps.get(mCurrentStepIndex);
+
+            Log.v("FRAGM", "HEREEE");
+
+            if (!step.getVideoUrl().equals("")) {
+                mPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.question_mark));
+                initMediaSession();
+                Log.v("Player", step.getVideoUrl());
+
+                initPlayer(Uri.parse(step.getVideoUrl()));
+
+                if (savedInstanceState != null) {
+
+                    long position = savedInstanceState.getLong(PLAYER_POSITION_KEY);
+
+                    mPlayer.seekTo(position);
+                }
+
+            } else {
+                mPlayerView.setVisibility(View.GONE);
+            }
+
+            mStepDescriptionTV.setText(step.getDescription());
 
         } catch (NullPointerException npe) {
             npe.printStackTrace();
@@ -132,10 +173,16 @@ public class StepDetailsFragment extends Fragment implements SimpleExoPlayer.Eve
         }
     }
 
-    private void relesePlayer() {
-        mPlayer.stop();
-        mPlayer.release();
-        mPlayer = null;
+    private void releaseResources() {
+        if (mPlayer != null) {
+            mPlayer.stop();
+            mPlayer.release();
+            mPlayer = null;
+        }
+
+        if (mMediaSession != null) {
+            mMediaSession.setActive(false);
+        }
     }
 
     private class BakingSessionCallback extends MediaSessionCompat.Callback {
@@ -153,6 +200,48 @@ public class StepDetailsFragment extends Fragment implements SimpleExoPlayer.Eve
         public void onSkipToPrevious() {
             mPlayer.seekTo(0);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        releaseResources();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //Toast.makeText(getActivity(), "Changed orietation", Toast.LENGTH_SHORT).show();
+        // Checking the orientation of the screen
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mPlayerView.getLayoutParams();
+//            params.width = params.MATCH_PARENT;
+//            params.height = params.MATCH_PARENT;
+//            mPlayerView.setLayoutParams(params);
+//            if(getActivity().getActionBar()!=null) {
+//                getActivity().getActionBar().hide();
+//            }
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+//
+//            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mPlayerView.getLayoutParams();
+//            params.width = params.MATCH_PARENT;
+//            params.height = 600;
+//            mPlayerView.setLayoutParams(params);
+//            if(getActivity().getActionBar()!=null) {
+//                getActivity().getActionBar().show();
+//            }
+//        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        long playerPosition = mPlayer.getCurrentPosition();
+
+        outState.putLong(PLAYER_POSITION_KEY, playerPosition);
+
     }
 
     @Override

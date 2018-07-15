@@ -15,12 +15,17 @@ import com.andev.tudor.bakingapp.data.Recipe;
 import com.andev.tudor.bakingapp.data.Step;
 import com.andev.tudor.bakingapp.fragments.RecipeDetailsFragment;
 import com.andev.tudor.bakingapp.fragments.StepDetailsFragment;
+import com.andev.tudor.bakingapp.utils.Constants;
 import com.andev.tudor.bakingapp.utils.InterfaceUtils;
+import com.andev.tudor.bakingapp.utils.SharedPreferencesUtils;
+import com.andev.tudor.bakingapp.widget.IngredientsWidgetProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class RecipeDetailsActivity extends AppCompatActivity implements InterfaceUtils.RecipeStepListener {
+import static com.andev.tudor.bakingapp.utils.Constants.SHARED_PREF_CURRENT_RECIPE_KEY;
+
+public class RecipeDetailsActivity extends AppCompatActivity {
 
     private RecipeStepAdapter mRecipeStepAdapter;
     private final String RECIPE_EXTRA = "recipe_extra";
@@ -36,6 +41,21 @@ public class RecipeDetailsActivity extends AppCompatActivity implements Interfac
         ButterKnife.bind(this);
 
         Intent i = getIntent();
+
+        if (i.hasExtra(Constants.CURRENT_RECIPE_INDEX_TAG)) {
+            int recipeIndex = i.getIntExtra(Constants.CURRENT_RECIPE_INDEX_TAG, 0);
+            boolean isSharedPrefUpdated = SharedPreferencesUtils.setIntToSharedPrefsForKey(Constants.SHARED_PREF_CURRENT_RECIPE_KEY, recipeIndex, getApplicationContext());
+
+            if (isSharedPrefUpdated) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        IngredientsWidgetProvider.sendRefreshBroadcast(getApplicationContext());
+                    }
+                });
+            }
+
+        }
 
         if (i.hasExtra(RECIPE_EXTRA)) {
             Log.v("DetailsActivity", "Intent has extra");
@@ -55,17 +75,4 @@ public class RecipeDetailsActivity extends AppCompatActivity implements Interfac
 
     }
 
-    @Override
-    public void onStepClick(Step step) {
-
-        Bundle args = new Bundle();
-        args.putParcelable(STEP_TAG, step);
-
-        StepDetailsFragment stepDetailsFragment = new StepDetailsFragment();
-        stepDetailsFragment.setArguments(args);
-
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.add(R.id.recipe_details_fl, stepDetailsFragment).commit();
-
-    }
 }

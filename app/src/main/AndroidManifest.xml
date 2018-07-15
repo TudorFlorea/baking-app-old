@@ -20,7 +20,41 @@
             </intent-filter>
         </activity>
         <activity android:name=".RecipeDetailsActivity" />
-        <activity android:name=".StepDetailsActivity"></activity>
+        <activity android:name=".StepDetailsActivity" />
+
+        <!--
+        <service
+            android:name=".IngredientsListWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        -->
+
+        <service android:name=".widget.IngredientsRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!--
+        <receiver android:name=".IngredientsWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.andev.tudor.bakingapp.ACTION_INGREDIENTS_SENT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ingredients_widget_info" />
+        </receiver>
+           -->
+        <receiver android:name=".widget.IngredientsWidgetProvider"
+                android:label="Ingredients Widget" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ingredients_widget_info" />
+
+        </receiver>
+
     </application>
 
 </manifest>
